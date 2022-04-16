@@ -227,11 +227,18 @@ contract MyAuction
         address _seller = seller;
         require(getMessageSender() == _seller, "You cannot call this function.");
         uint256 __highest_bid = getHighestBid();
-        require(__highest_bid > 0, "No one bid your nft.");
-        address _winner = price_to_bidder[__highest_bid];
+        
+        if(__highest_bid > 0)
+        {
+            still_bidding = false;
+        }
+        else
+        {
+            address _winner = price_to_bidder[__highest_bid];
 
-        nft.safeTransferFrom(_seller, _winner, nft_id);
-        still_bidding = false;
+            nft.safeTransferFrom(_seller, _winner, nft_id);
+            still_bidding = false;
+        }
     }
 
 }
