@@ -5,12 +5,12 @@ import "./Interfaces/IERC20.sol";
 import "./Libraries/PureMath.sol";
 
 /*
- * @title: Aguia 2.0 ($AGU) An re-write of the ERC-20 token, $AGU ref[].
+ * @title: Aguia 2.0 ($AGU) An re-write of the ERC-20 token, $AGU ref[https://github.com/fps8k/my-solidity/tree/Aguia-2.0/erc20%20-%20%24AGU].
  * @author: Anthony (fps) https://github.com/fps8k .
  * @dev: 
 */
 
-// contract Aguia
+
 contract Aguia is IERC20
 {
     using PureMath for uint256;
@@ -26,7 +26,7 @@ contract Aguia is IERC20
 
     // Owner address and a mapping of owners that can perform actions with the token.
 
-    // address private _owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;            // My Ethereum wallet address for production.
+    // address private _owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;            	  // My Ethereum wallet address for production.
     address private _owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;               // My Fake Remix wallet address for development.
     
     mapping(address => bool) private _approved_owners;
