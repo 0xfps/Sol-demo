@@ -210,6 +210,7 @@ contract Aguia is IERC20
         require(msg.sender != address(0), "!Address");
         require(spender != address(0), "!Spender");
         require(exists(msg.sender), "!Account Exists");
+        require(msg.sender != spender, "Caller == Spender");
         require(_balances[msg.sender] >= amount, "Balance < Amount");
 
         _allowances[msg.sender][spender] += amount;
@@ -293,10 +294,11 @@ contract Aguia is IERC20
     /*
     * @dev: {changeOwner()} changes owner of token
     */
-    
+
     function changeOwner(address new_owner) public
     {
         require(msg.sender == _owner, "!Owner");
+        require(new_owner != _owner, "New Owner == Old owner");
 
         _owner = new_owner;
 
