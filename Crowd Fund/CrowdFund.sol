@@ -93,7 +93,7 @@ contract CrowdFund
         require(_amount > 0, "Amount < 0");                                     // Amount is > 0.
 
         
-        // this_campaign.token.transferFrom(msg.sender, address(this), _amount);
+        this_campaign.token.transferFrom(msg.sender, address(this), _amount);
         this_campaign.total_amount += _amount;
 
         donors[_campaign_number][msg.sender] += _amount;
@@ -120,21 +120,11 @@ contract CrowdFund
         campaign[_campaign_number].total_amount -= _pledge;
         donors[_campaign_number][msg.sender] = 0;
 
-        // this_campaign.token.transfer(msg.sender, _pledge);
+        this_campaign.token.transfer(msg.sender, _pledge);
 
         emit Withdraw(msg.sender, _campaign_number, _pledge);
     }
 
-
-    function see() public view returns(uint)
-    {
-        return campaign[1].total_amount;
-    }
-
-    function see2() public view returns(uint)
-    {
-        return donors[1][msg.sender];
-    }
 
 
 
@@ -164,7 +154,7 @@ contract CrowdFund
         require(campaign[_campaign_number].ended, "Not ended.");
         // require(campaign[_campaign_number].total_amount >= campaign[_campaign_number].target_amount, "Not up to target, refund the funders.");
 
-        // campaign[_campaign_number].token.transfer(msg.sender, campaign[_campaign_number].total_amount);
+        campaign[_campaign_number].token.transfer(msg.sender, campaign[_campaign_number].total_amount);
 
         campaign[_campaign_number].claimed = true;
 
