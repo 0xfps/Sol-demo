@@ -11,7 +11,7 @@ import "./Libraries/PureMath.sol";
 */
 
 // contract Aguia
-abstract contract Aguia is IERC20
+contract Aguia is IERC20
 {
     using PureMath for uint256;
 
@@ -20,14 +20,14 @@ abstract contract Aguia is IERC20
 
     string private _name;                                                               // Aguia 2.
     string private _symbol;                                                             // $AGU.
-    uint256 private _total_supply;                                                       // 1_000_000.
+    uint256 private _total_supply;                                                      // 1_000_000.
     uint8 private _decimals;                                                            // 18.
 
 
     // Owner address and a mapping of owners that can perform actions with the token.
 
-    // address constant _owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;            // My Ethereum wallet address for production.
-    address constant _owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;               // My Fake Remix wallet address for development.
+    // address private _owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;            // My Ethereum wallet address for production.
+    address private _owner = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;               // My Fake Remix wallet address for development.
     
     mapping(address => bool) private _approved_owners;
 
@@ -37,6 +37,14 @@ abstract contract Aguia is IERC20
     mapping(address => uint256) public _balances;                                       // Change to private on production.
     
     mapping(address => mapping(address => uint256)) private _allowances;
+
+
+    // Events
+
+    event Create(address, uint256, string, uint256);                                    // Address, time, name, supply.
+    event Mint(address, uint256, uint256);                                              // Address, time, supply.
+    event Burn(address, uint256, uint256);                                              // Address, time, supply.
+    event Change(address, uint256, address);                                            // Old address, time, new address.
 
 
 
@@ -55,6 +63,8 @@ abstract contract Aguia is IERC20
 
         _balances[_owner] = _total_supply;
         _approved_owners[_owner] = true;
+
+        emit Create(_owner, block.timestamp, _name, _total_supply);
     }
 
 
@@ -116,6 +126,14 @@ abstract contract Aguia is IERC20
 
 
 
+    function isOneOfTheTwo(address __owner, address __spender) private view returns(bool)
+    {
+        return((msg.sender == __owner) || msg.sender == __spender);
+    }
+
+
+
+
 
     /**
     * @dev Moves `amount` tokens from the caller's account to `to`.
@@ -135,6 +153,8 @@ abstract contract Aguia is IERC20
 
         _balances[msg.sender] = _balances[msg.sender].sub(amount);                  // Subtract from sender.
         _balances[to] = _balances[to].add(amount);                                  // Add to receiver.
+
+        _approved_owners[to] = true;
 
         emit Transfer(msg.sender, to, amount);
 
@@ -159,9 +179,127 @@ abstract contract Aguia is IERC20
         require(spender != address(0), "!Spender");
         require(exists(owner), "!Owner");
         require(exists(spender), "!Spender");
-        require(msg.sender == spender, "Can't see allowance for this address");
+        require(isOneOfTheTwo(owner, spender), "!Owner && !Spender)");
 
         uint256 _allowance = _allowances[owner][spender];
         return _allowance;
+    }
+
+
+
+
+    /**
+    * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+    *
+    * Returns a boolean value indicating whether the operation succeeded.
+    *
+    * IMPORTANT: Beware that changing an allowance with this method brings the risk
+    * that someone may use both the old and the new allowance by unfortunate
+    * transaction ordering. One possible solution to mitigate this race
+    * condition is to first reduce the spender's allowance to 0 and set the
+    * desired value afterwards:
+    * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+    *
+    * Emits an {Approval} event.
+    */
+
+    function approve(address spender, uint256 amount) public override returns(bool)
+    {
+        // msg.sender == the address of the caller.
+
+        require(msg.sender != address(0), "!Address");
+        require(spender != address(0), "!Spender");
+        require(exists(msg.sender), "!Account Exists");
+        require(_balances[msg.sender] >= amount, "Balance < Amount");
+
+        _allowances[msg.sender][spender] += amount;
+
+        emit Approval(msg.sender, spender, amount);
+
+        return true;
+    }
+
+
+
+
+
+    /**
+    * @dev Moves `amount` tokens from `from` to `to` using the
+    * allowance mechanism. `amount` is then deducted from the caller's
+    * allowance.
+    *
+    * Returns a boolean value indicating whether the operation succeeded.
+    *
+    * The person calling transferFrom doesn't need to own tokens.
+    *
+    * Emits a {Transfer} event.
+    */
+
+    function transferFrom(address from, address to, uint256 amount) public override returns(bool)
+    {
+        require(msg.sender != address(0), "!Address");
+        require(from != address(0), "!From");
+        require(to != address(0), "!To");
+        require(exists(from), "From !Exists");
+        require(exists(to), "To !Exists");
+        require(_allowances[from][msg.sender] >= amount, "Balance < Amount");
+
+        _balances[from] = _balances[from].sub(amount);
+        _balances[to] = _balances[to].add(amount);
+        _allowances[from][msg.sender] = _allowances[from][msg.sender].sub(amount);
+
+        emit Transfer(from, to, amount);
+
+        return true;
+    }
+
+
+
+
+    /*
+    * @dev: {mint()} adds more tokens to the `_total_supply`.
+    */
+
+    function mint(uint256 amount) public
+    {
+        require(msg.sender == _owner, "!Owner");
+        uint256 _supply = amount * (10 ** _decimals);
+
+        _total_supply = _total_supply.add(_supply);
+
+        emit Mint(msg.sender, block.timestamp, _supply);
+    }
+
+
+
+
+    /*
+    * @dev: burn() removes from the token
+    */
+
+    function burn(uint256 amount) public
+    {
+        require(msg.sender == _owner, "!Owner");
+        uint256 _supply = amount * (10 ** _decimals);
+
+        _total_supply = _total_supply.sub(_supply);
+
+        emit Burn(msg.sender, block.timestamp, _supply);
+    }
+
+
+
+
+    /*
+    * @dev: {changeOwner()} changes owner of token
+    */
+    
+    function changeOwner(address new_owner) public
+    {
+        require(msg.sender == _owner, "!Owner");
+
+        _owner = new_owner;
+
+        emit Change(msg.sender, block.timestamp, new_owner);
     }
 }
