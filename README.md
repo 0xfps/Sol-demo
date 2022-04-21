@@ -45,3 +45,15 @@
 > - **3. CrowdFund:**
 
 *In development 🤘🏾*
+
+##
+
+<br/>
+
+> - **4. Aguia 2.0:**
+
+A safer and more secure version of the old <a href="https://github.com/fps8k/my-solidity/tree/main/erc20%20-%20%24AGU">Aguia</a> token.
+
+##
+
+<br/>
