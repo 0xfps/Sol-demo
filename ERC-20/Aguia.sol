@@ -20,7 +20,7 @@ contract Aguia is IERC20
 
     string private _name;                                                               // Aguia 2.
     string private _symbol;                                                             // $AGU.
-    uint256 private _total_supply;                                                      // 1_000_000.
+    uint256 private _totalSupply;                                                      // 1_000_000.
     uint8 private _decimals;                                                            // 18.
 
 
@@ -34,7 +34,7 @@ contract Aguia is IERC20
 
     // Token holders and allowances.
 
-    mapping(address => uint256) public _balances;                                       // Change to private on production.
+    mapping(address => uint256) private _balances;                                       // Change to private on production.
     
     mapping(address => mapping(address => uint256)) private _allowances;
 
@@ -56,15 +56,15 @@ contract Aguia is IERC20
         _name = "Aguia 2.0";
         _symbol = "$AGU";
         _decimals = 18;
-        _total_supply = 1e9 * (10 ** _decimals);
+        _totalSupply = 1e9 * (10 ** _decimals);
 
 
         // Give the owner all the token.
 
-        _balances[_owner] = _total_supply;
+        _balances[_owner] = _totalSupply;
         _approved_owners[_owner] = true;
 
-        emit Create(_owner, block.timestamp, _name, _total_supply);
+        emit Create(_owner, block.timestamp, _name, _totalSupply);
     }
 
 
@@ -94,9 +94,9 @@ contract Aguia is IERC20
 
 
 
-    function totalSupply() public view override returns(uint256 __total_supply)
+    function totalSupply() public view override returns(uint256 __totalSupply)
     {
-        __total_supply = _total_supply;
+        __totalSupply = _totalSupply;
     }
 
 
@@ -116,7 +116,7 @@ contract Aguia is IERC20
 
     function balanceOf(address account) public view override returns(uint256)
     {
-        require(msg.sender != address(0), "!Address");
+        // require(msg.sender != address(0), "!Address");
         require(exists(account), "Account !Exists");
 
         uint256 _balance_of = _balances[account];
@@ -258,7 +258,7 @@ contract Aguia is IERC20
 
 
     /*
-    * @dev: {mint()} adds more tokens to the `_total_supply`.
+    * @dev: {mint()} adds more tokens to the `_totalSupply`.
     */
 
     function mint(uint256 amount) public
@@ -266,7 +266,7 @@ contract Aguia is IERC20
         require(msg.sender == _owner, "!Owner");
         uint256 _supply = amount * (10 ** _decimals);
 
-        _total_supply = _total_supply.add(_supply);
+        _totalSupply = _totalSupply.add(_supply);
 
         emit Mint(msg.sender, block.timestamp, _supply);
     }
@@ -283,7 +283,7 @@ contract Aguia is IERC20
         require(msg.sender == _owner, "!Owner");
         uint256 _supply = amount * (10 ** _decimals);
 
-        _total_supply = _total_supply.sub(_supply);
+        _totalSupply = _totalSupply.sub(_supply);
 
         emit Burn(msg.sender, block.timestamp, _supply);
     }
