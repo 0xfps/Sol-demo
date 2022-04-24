@@ -26,7 +26,7 @@ contract Faucet
     {
         require(msg.value >= 100000000 gwei, "Min == 0.1ETH");
         require(msg.value <= 500000000 gwei, "Max == 0.5ETH");
-        // owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;
+        owner = 0x5e078E6b545cF88aBD5BB58d27488eF8BE0D2593;
     }
 
 
