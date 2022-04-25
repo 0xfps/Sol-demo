@@ -257,8 +257,40 @@ contract GTA
         uint8 striker_weapon_damage = damage[striker_info.current_weapon];
 
         if ((_victim_health - striker_weapon_damage) <= 0)
+        {
             users[_victim].health = 0;
+            users[_victim].weapons = ["hand", "", ""];
+        }
         else
+        {
             users[_victim].health -= striker_weapon_damage;
+        }
     }
+
+
+
+
+    /*
+    *
+    */
+
+    function refill() public validSender payable
+    {
+        require(exists(msg.sender), "!Registered");
+        require(msg.value >= 100000000 gwei, "Min == 0.5ETH");
+
+        Info memory info = users[msg.sender];
+        
+        string[] memory existing_artifacts = new string[](3);
+        
+        existing_artifacts[0] = info.artifacts[0];
+        existing_artifacts[1] = info.artifacts[1];
+        existing_artifacts[2] = info.artifacts[2];
+
+        if(isInArray("armour", existing_artifacts))
+            users[msg.sender].health = 200;
+        else
+            users[msg.sender].health = 100;
+    }
+
 }
