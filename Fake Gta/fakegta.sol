@@ -31,13 +31,8 @@ contract GTA
         address user_id;
         string username;
         uint8 health;
-        string[3] weapons;
+        string[2] weapons;
         string current_weapon;
-        string[3] cars;
-        string current_car;
-        uint256 value;
-        string[3] artifacts;
-        string current_artifact;
         State state;
     }
 
@@ -49,7 +44,7 @@ contract GTA
 
     // Users.
 
-    mapping(address => Info) private users;
+    mapping(address => Info) public users;
 
     
     /*
@@ -74,35 +69,6 @@ contract GTA
     mapping(string => uint64) private weapon_costs;
 
 
-    /*
-    * @dev:
-    *
-    * When players release their weapons, it appears here, and pepole can take it for free.
-    *
-    */
-
-    mapping(string => uint64) private free_weapons;
-
-
-
-    /*
-    * Artifacts mapping. ONLY 3 ARTIFACTS.
-    */
-
-    mapping(string => uint64) private artifact_costs;
-
-
-    /*
-    * Car to cost.
-    * @dev:
-    * Aston Martin = 200 gwei.
-    * Lamborghini = 300 gwei.
-    * Ferrari = 500 gwei.
-    */
-
-    mapping(string => uint64) private car_costs;
-
-
 
 
     constructor()
@@ -111,21 +77,9 @@ contract GTA
         damage["knife"] = 3;
         damage["gun"] = 5;
 
-        
-        weapon_costs["hand"] = 0 gwei;
+
         weapon_costs["knife"] = 50 gwei;
         weapon_costs["gun"] = 100 gwei;
-
-
-        artifact_costs["helmet"] = 4 gwei;
-        artifact_costs["boots"] = 7 gwei;
-        artifact_costs["armour"] = 10 gwei;
-
-
-        
-        car_costs["aston martin"] = 200 gwei;
-        car_costs["lamborghini"] = 300 gwei;
-        car_costs["ferrari"] = 500 gwei;
     }
 
 
@@ -172,21 +126,17 @@ contract GTA
     
     // Registers a new player
 
-    function register(string memory _username) public validSender
+    function register(string memory __username) public validSender
     {
         require(!exists(msg.sender), "Already registered.");
+        string memory _username = __username.lower();
         
         Info memory new_info = Info(
             msg.sender,
             _username,
             100,
-            ["hand", "", ""],
+            ["hand", ""],
             "hand",
-            ["", "", ""],
-            "",
-            0,
-            ["", "", ""],
-            "",
             State.online
         );
 
@@ -207,16 +157,18 @@ contract GTA
     * The current weapon isn't the `_weapon` passed.
     */
 
-    function changeWeapon(string memory _weapon) public validSender
+    function changeWeapon(string memory __weapon) public validSender
     {
         require(exists(msg.sender), "!Registered.");
+        require(users[msg.sender].state == State.online, "Offline");
         
+        string memory _weapon = __weapon.lower();
+
         Info memory info = users[msg.sender];
         string[] memory existing_weapons = new string[](3);
         
         existing_weapons[0] = info.weapons[0];
         existing_weapons[1] = info.weapons[1];
-        existing_weapons[2] = info.weapons[2];
         
         require(!_weapon.equal(info.current_weapon), "Current weapon");
         require(isInArray(_weapon, existing_weapons), "Item !in Kit");
@@ -242,6 +194,8 @@ contract GTA
         require(exists(msg.sender), "!Registered");
         require(_victim != address(0), "!Address");
         require(exists(_victim), "!Victim Registered");
+        require(users[msg.sender].state == State.online, "Offline");
+        require(users[_victim].state == State.online, "Victim Offline");
 
 
         Info memory victim_info = users[_victim];
@@ -259,7 +213,7 @@ contract GTA
         if ((_victim_health - striker_weapon_damage) <= 0)
         {
             users[_victim].health = 0;
-            users[_victim].weapons = ["hand", "", ""];
+            users[_victim].weapons = ["hand", ""];
         }
         else
         {
@@ -271,26 +225,61 @@ contract GTA
 
 
     /*
-    *
+    * refill() to fill up your health with some eth.
     */
 
     function refill() public validSender payable
     {
         require(exists(msg.sender), "!Registered");
-        require(msg.value >= 100000000 gwei, "Min == 0.5ETH");
+        require(users[msg.sender].state == State.online, "Offline");
+        require(msg.value >= 500 gwei, "Min == 500 gwei");
 
-        Info memory info = users[msg.sender];
-        
-        string[] memory existing_artifacts = new string[](3);
-        
-        existing_artifacts[0] = info.artifacts[0];
-        existing_artifacts[1] = info.artifacts[1];
-        existing_artifacts[2] = info.artifacts[2];
-
-        if(isInArray("armour", existing_artifacts))
-            users[msg.sender].health = 200;
-        else
-            users[msg.sender].health = 100;
+        users[msg.sender].health = 100;
     }
 
+
+
+
+    /*
+    * toggle() toggles between off and online
+    */
+
+    function toggle() public validSender
+    {
+        require(exists(msg.sender), "!Registered");   
+        
+        if (users[msg.sender].state == State.offline)
+            users[msg.sender].state = State.online;
+        else
+            users[msg.sender].state = State.offline;
+    }
+
+
+
+
+    /*
+    *
+    */
+
+    function buyWeapon(string memory __weapon) public payable validSender
+    {
+        require(exists(msg.sender), "!Registered");
+        require(users[msg.sender].state == State.online, "Offline");
+
+        string memory _weapon = __weapon.lower();
+
+        Info memory info = users[msg.sender];
+        string[] memory existing_weapons = new string[](3);
+        
+        existing_weapons[0] = info.weapons[0];
+        existing_weapons[1] = info.weapons[1];
+
+        require(!isInArray(_weapon, existing_weapons), "Already in weapons");
+
+        require(weapon_costs[_weapon] > 0, "!Weapon");
+        require(msg.value >= weapon_costs[_weapon], "Knife:: 50 gwei, Gun:: 100gwei");
+
+        users[msg.sender].weapons[1] = _weapon;
+        users[msg.sender].current_weapon = _weapon;
+    }
 }
