@@ -44,7 +44,7 @@ contract GTA
 
     // Users.
 
-    mapping(address => Info) public users;
+    mapping(address => Info) private users;
 
     
     /*
