@@ -57,3 +57,15 @@ A safer and more secure version of the old <a href="https://github.com/fps8k/my-
 ##
 
 <br/>
+
+> - **5. Faucet**
+
+Rinkeby faucet that transfers 0.1 Ether to every address, without time limits.
+
+##
+
+<br/>
+
+> - **6. ToDo**
+
+A basic smart contract to do list.
