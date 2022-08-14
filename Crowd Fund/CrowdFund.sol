@@ -6,12 +6,11 @@ import "./Interfaces/PureMath.sol";
 
 /*
  * @title: Crown Fund Smart Contract [Pledge code].
- * @author: Anthony (fps) https://github.com/fps8k .
+ * @author: Anthony (fps) https://github.com/0xfps.
  * @dev: reference [README.md]
 */
 
-contract CrowdFund
-{
+contract CrowdFund {
     
     // Number of campaigns total;
     
