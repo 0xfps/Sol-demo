@@ -6,13 +6,12 @@ import "./Interfaces/SafeMath.sol";
 
 /*
  * @title: DutchAuction Smart Contract.
- * @author: Anthony (fps) https://github.com/fps8k .
+ * @author: Anthony (fps) https://github.com/0xfps.
  * @dev: Reference [README.md].
  * @notice: Same as Auction [reference ./ Auction/Auction.sol] but with some differences.
 */
 
-contract DutchAuction
-{
+contract DutchAuction {
     using SafeMath for uint256;
 
     // Creating necessary state variables.
