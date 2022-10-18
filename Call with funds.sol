@@ -38,7 +38,7 @@ contract B {
         sent;
     }
 
-    /// @dev Use this when you have the contract deployed by you.
+    /// @dev Use this when you have the contract deployed by you and the source code imported.
     function set2(uint _a) public {
         a.setA{value: 1}(_a);
     }
